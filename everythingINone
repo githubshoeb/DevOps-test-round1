@@ -1,0 +1,56 @@
+#Install docker 
+
+sudo apt-get install     ca-certificates     curl     gnupg     lsb-release
+echo   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  sudo apt-get update
+  sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  sudo docker run hello-world
+
+
+
+#EC2
+
+mkdir py-docker-server-config
+cd py-docker-server-config
+touch server,py
+vi server.py
+
+#add in server.py
+
+
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+class HelloHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b"Hello, world!")
+
+httpd = HTTPServer(('0.0.0.0', 8000), HelloHandler)
+httpd.serve_forever()
+
+
+touch dockerfile
+vi dockerfile
+
+#add
+FROM python:3
+WORKDIR /app
+COPY server.py /app
+EXPOSE 8000
+CMD ["python", "server.py"]
+
+
+#build server image
+
+docker build -t my-web-server .
+
+docker run -p 8000:8000 my-web-server
+
+
+#IP to access webapp
+http://3.219.35.27:8000/
+
+
